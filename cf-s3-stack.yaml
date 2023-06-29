@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  BucketName:
+    Type: String
+    Description: Enter a unique name for the S3 bucket
+  EncryptionType:
+    Type: String
+    Description: Select the encryption type for the S3 bucket
+    Default: SSE-S3
+    AllowedValues:
+      - SSE-S3
+      - KMS
+Conditions:
+  UseSSE-S3: !Equals [!Ref EncryptionType, SSE-S3]
+Resources:
+  S3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Ref BucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: !If [UseSSE-S3, AES256, aws:kms]
+Outputs:
+  BucketNameOutput:
+    Description: Name of the deployed S3 bucket
+    Value: !Ref S3Bucket
+  EncryptionTypeOutput:
+    Description: Encryption type used for the S3 bucket
+    Value: !Ref EncryptionType
+
+
